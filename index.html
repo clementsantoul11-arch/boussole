@@ -1,0 +1,711 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="theme-color" content="#000000" />
+  <title>Boussole</title>
+
+  <style>
+    :root{
+      --bg:#000;
+      --panel: rgba(0,0,0,.48);
+      --panel2: rgba(255,255,255,.03);
+      --stroke:#262626;
+      --text:#f2f2f2;
+      --muted:#a7a7a7;
+      --accent:#7c5cff;
+      --good:#2ee59d;
+      --danger:#ff5c7a;
+      --radius:18px;
+      --radius2:14px;
+      --shadow: 0 18px 42px rgba(0,0,0,.62);
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+      --base: 14px;
+      --mutedSize: 12px;
+      --btn: 13px;
+      --title: 18px;
+    }
+
+    .bigtext{
+      --base: 18px;
+      --mutedSize: 15px;
+      --btn: 16px;
+      --title: 22px;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      background:
+        radial-gradient(1200px 900px at 20% 15%, rgba(124,92,255,.10), transparent 60%),
+        radial-gradient(1000px 700px at 80% 70%, rgba(46,229,157,.10), transparent 60%),
+        var(--bg);
+      color:var(--text);
+      font-family:var(--font);
+      font-size:var(--base);
+    }
+
+    .wrap{ min-height:100%; display:grid; place-items:center; padding:18px; }
+    .app{
+      width:min(1040px, 100%);
+      border:1px solid var(--stroke);
+      border-radius:24px;
+      box-shadow:var(--shadow);
+      background: var(--panel);
+      overflow:hidden;
+      display:grid;
+      grid-template-rows:auto 1fr auto;
+      backdrop-filter: blur(10px);
+    }
+
+    header{
+      display:flex; justify-content:space-between; align-items:center; gap:12px;
+      padding:14px 14px;
+      border-bottom:1px solid var(--stroke);
+      background: rgba(0,0,0,.68);
+      flex-wrap:wrap;
+    }
+    .brand{ display:flex; align-items:center; gap:10px; min-width:260px; }
+    .logo{
+      width:34px; height:34px; border-radius:12px; flex:none;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(124,92,255,.9), rgba(124,92,255,.15) 55%, transparent 70%),
+        radial-gradient(circle at 70% 70%, rgba(46,229,157,.9), rgba(46,229,157,.15) 55%, transparent 70%),
+        #070707;
+      border:1px solid #222;
+      box-shadow:0 0 0 1px rgba(255,255,255,.03) inset;
+    }
+    h1{ margin:0; font-size:var(--title); letter-spacing:.2px; }
+    .subtitle{ margin:2px 0 0; color:var(--muted); font-size:var(--mutedSize); line-height:1.45; }
+
+    .topActions{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
+    .chip{
+      font-family:var(--mono);
+      font-size:11px;
+      color:#cfcfcf;
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.03);
+      padding:6px 10px;
+      border-radius:999px;
+      user-select:none;
+      white-space:nowrap;
+    }
+
+    .btn{
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.04);
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:12px;
+      font-size:var(--btn);
+      cursor:pointer;
+      transition: transform .08s ease, background .15s ease, border-color .15s ease;
+    }
+    .btn:hover{ background: rgba(255,255,255,.06); border-color:#303030; }
+    .btn:active{ transform: translateY(1px); }
+    .btn.primary{ border-color: rgba(124,92,255,.45); background: rgba(124,92,255,.14); }
+    .btn.good{ border-color: rgba(46,229,157,.45); background: rgba(46,229,157,.12); }
+    .btn.danger{ border-color: rgba(255,92,122,.45); background: rgba(255,92,122,.12); }
+
+    main{
+      padding:12px;
+      display:grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap:12px;
+      min-height:0;
+    }
+    .card{
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.02);
+      border-radius:24px;
+      padding:14px;
+      overflow:hidden;
+      min-height:0;
+    }
+    .card.wide{ grid-column: 1 / -1; }
+
+    h2{ margin:0 0 6px; font-size: calc(var(--base) + 2px); letter-spacing:.2px; }
+    .muted{ color:var(--muted); font-size:var(--mutedSize); line-height:1.5; }
+
+    label{ display:block; margin:12px 0 6px; font-size:var(--mutedSize); color:#dbdbdb; }
+    input, textarea, select{
+      width:100%;
+      border:1px solid #2a2a2a;
+      background:#070707;
+      color:var(--text);
+      border-radius:12px;
+      padding:12px;
+      font-size:var(--base);
+      outline:none;
+    }
+    input:focus, textarea:focus, select:focus{ border-color: rgba(124,92,255,.65); }
+    textarea{ min-height:92px; resize:vertical; }
+
+    .row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+    .row > *{ flex:1; min-width:200px; }
+
+    .toolbar{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:10px;
+      align-items:center;
+    }
+    .seg{
+      display:flex;
+      border:1px solid var(--stroke);
+      border-radius:999px;
+      overflow:hidden;
+      background: rgba(255,255,255,.03);
+    }
+    .seg button{
+      border:0;
+      background:transparent;
+      color:var(--text);
+      padding:8px 10px;
+      font-size:var(--btn);
+      cursor:pointer;
+      opacity:.85;
+    }
+    .seg button[aria-pressed="true"]{
+      background: rgba(124,92,255,.18);
+      opacity:1;
+    }
+
+    .suggestBox{ margin-top:10px; display:flex; flex-direction:column; gap:8px; }
+    .suggestItem{
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.03);
+      border-radius:16px;
+      padding:10px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:flex-start;
+      animation: pop .14s ease;
+    }
+    @keyframes pop{ from{ transform:translateY(2px); opacity:.0 } to{ transform:translateY(0); opacity:1 } }
+    .suggestItem .t{ font-size:var(--base); line-height:1.3; }
+    .suggestItem .m{ color:var(--muted); font-size:var(--mutedSize); margin-top:4px; }
+
+    .list{
+      margin-top:10px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      overflow:auto;
+      max-height: 430px;
+      padding-right:4px;
+    }
+    .item{
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.03);
+      border-radius:16px;
+      padding:10px;
+      display:grid;
+      grid-template-columns: 1fr auto;
+      gap:10px;
+      align-items:start;
+      animation: pop .14s ease;
+    }
+    .title{
+      margin:0;
+      font-size:var(--base);
+      line-height:1.25;
+      cursor:pointer;
+      user-select:none;
+    }
+    .meta{
+      margin-top:6px;
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      color:var(--muted);
+      font-size:var(--mutedSize);
+    }
+    .tag{
+      font-family:var(--mono);
+      font-size:11px;
+      border:1px solid var(--stroke);
+      background: rgba(0,0,0,.35);
+      padding:3px 8px;
+      border-radius:999px;
+      color:#cfcfcf;
+      white-space:nowrap;
+    }
+    .iconBtn{
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.04);
+      color:var(--text);
+      border-radius:12px;
+      padding:9px 10px;
+      cursor:pointer;
+      font-size:var(--btn);
+      min-width:52px;
+    }
+    .iconBtn:hover{ background: rgba(255,255,255,.06); }
+
+    .done{ text-decoration: line-through; opacity:.75; }
+
+    footer{
+      padding:10px 12px;
+      border-top:1px solid var(--stroke);
+      background: rgba(0,0,0,.68);
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      color:var(--muted);
+      font-size:var(--mutedSize);
+    }
+
+    *::-webkit-scrollbar{ width:10px; height:10px; }
+    *::-webkit-scrollbar-thumb{ background:#1b1b1b; border-radius:999px; border:2px solid transparent; background-clip:content-box; }
+    *::-webkit-scrollbar-track{ background: transparent; }
+
+    @media (max-width: 900px){
+      main{ grid-template-columns:1fr; }
+      .list{ max-height: 480px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="app" role="application" aria-label="Boussole">
+      <header>
+        <div class="brand">
+          <div class="logo" aria-hidden="true"></div>
+          <div>
+            <h1>Boussole</h1>
+            <div class="subtitle">Sans pression. Un petit pas utile, maintenant.</div>
+          </div>
+        </div>
+
+        <div class="topActions">
+          <span class="chip" id="clock">—</span>
+          <button class="btn" id="bigBtn" title="Gros texte">Aa</button>
+          <button class="btn" id="exportBtn" title="Exporter">Export</button>
+          <button class="btn danger" id="resetBtn" title="Tout effacer">Reset</button>
+        </div>
+      </header>
+
+      <main>
+        <section class="card">
+          <h2>Ajouter une action</h2>
+          <div class="muted">Petit + faisable = mieux. Tu peux écrire n’importe quoi de simple.</div>
+
+          <label for="txt">Ton action</label>
+          <input id="txt" placeholder="Ex : marcher 10 minutes" autocomplete="off" />
+
+          <div class="row">
+            <button class="btn primary" id="addBtn">Ajouter</button>
+            <button class="btn good" id="helpBtn">Je suis en galère → 2 minutes</button>
+          </div>
+
+          <div class="suggestBox" id="suggestBox"></div>
+
+          <div class="muted" style="margin-top:10px;">
+            Astuce : <span class="tag">Entrée</span> pour ajouter • <span class="tag">Clic</span> sur une action = “fait”.
+          </div>
+        </section>
+
+        <section class="card">
+          <div style="display:flex; justify-content:space-between; gap:10px; align-items:center;">
+            <h2>Mes actions</h2>
+            <span class="tag" id="kpi">0</span>
+          </div>
+
+          <div class="toolbar">
+            <input id="search" placeholder="Rechercher…" />
+            <div class="seg" role="group" aria-label="Filtre">
+              <button id="fAll" aria-pressed="true" type="button">Tout</button>
+              <button id="fTodo" aria-pressed="false" type="button">À faire</button>
+              <button id="fDone" aria-pressed="false" type="button">Fait</button>
+            </div>
+          </div>
+
+          <div class="list" id="list"></div>
+        </section>
+
+        <section class="card wide">
+          <h2>Notes (optionnel)</h2>
+          <div class="muted">Privé (sur ton PC). Écris 2–3 lignes si ça aide.</div>
+
+          <label for="note">Note rapide</label>
+          <textarea id="note" placeholder="Ex : Aujourd’hui je ressens… / J’ai besoin de…"></textarea>
+
+          <div class="row">
+            <button class="btn" id="saveNoteBtn">Sauver la note</button>
+            <button class="btn" id="promptBtn">Question simple</button>
+          </div>
+
+          <div id="notes" class="suggestBox"></div>
+        </section>
+      </main>
+
+      <footer>
+        <span id="status">stockage local • hors-ligne</span>
+        <span>Raccourcis : <span class="tag">Ctrl+S</span> sauver • <span class="tag">Ctrl+K</span> focus action</span>
+      </footer>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const KEY = "boussole_advanced_v1";
+  const $ = (q) => document.querySelector(q);
+
+  const prompts = [
+    "Qu’est-ce qui t’aiderait un tout petit peu aujourd’hui ?",
+    "Si tu faisais 1 chose simple, ce serait quoi ?",
+    "Qu’est-ce que tu peux faire en 2 minutes, juste pour démarrer ?",
+    "Qu’est-ce qui te ferait respirer un peu mieux ?",
+    "Quel petit geste te ferait te respecter davantage ?"
+  ];
+
+  const micro2min = [
+    "Boire un verre d’eau",
+    "Ouvrir la fenêtre et respirer 10 fois",
+    "Ranger 5 objets",
+    "Écrire 1 phrase : “Là, j’ai besoin de…”",
+    "Mettre une minuterie 2 min et commencer (même mal)",
+    "Se lever et s’étirer 60 secondes",
+    "Envoyer un message : “Tu as 2 minutes ?”",
+    "Faire une liste de 3 (pas plus)"
+  ];
+
+  const state = load() ?? {
+    bigText: false,
+    filter: "all",     // all | todo | done
+    search: "",
+    tasks: [],         // {id, text, done, createdAt, minutes}
+    notes: []          // {id, text, createdAt}
+  };
+
+  // UI
+  const input = $("#txt");
+  const list = $("#list");
+  const suggestBox = $("#suggestBox");
+  const kpi = $("#kpi");
+  const status = $("#status");
+  const search = $("#search");
+
+  // Init
+  applyBigText();
+  tickClock();
+  bindEvents();
+  renderAll();
+
+  // Auto-save debounce
+  let saveTimer = null;
+  function scheduleSave(msg){
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => save(msg), 250);
+  }
+
+  function bindEvents(){
+    $("#addBtn").addEventListener("click", addTaskFromInput);
+    $("#helpBtn").addEventListener("click", show2MinChoices);
+    $("#bigBtn").addEventListener("click", () => { state.bigText = !state.bigText; applyBigText(); save("affichage mis à jour"); });
+
+    $("#exportBtn").addEventListener("click", exportData);
+    $("#resetBtn").addEventListener("click", resetAll);
+
+    input.addEventListener("keydown", (e) => { if(e.key === "Enter") addTaskFromInput(); });
+
+    search.value = state.search || "";
+    search.addEventListener("input", (e) => { state.search = e.target.value; scheduleSave(); renderTasks(); });
+
+    // Filters
+    $("#fAll").addEventListener("click", () => setFilter("all"));
+    $("#fTodo").addEventListener("click", () => setFilter("todo"));
+    $("#fDone").addEventListener("click", () => setFilter("done"));
+
+    // Notes
+    $("#saveNoteBtn").addEventListener("click", saveNote);
+    $("#promptBtn").addEventListener("click", () => {
+      $("#note").value = prompts[Math.floor(Math.random()*prompts.length)] + "\n";
+      $("#note").focus();
+    });
+
+    // Shortcuts
+    window.addEventListener("keydown", (e) => {
+      const isMac = navigator.platform.toLowerCase().includes("mac");
+      const mod = isMac ? e.metaKey : e.ctrlKey;
+      if(mod && e.key.toLowerCase() === "s"){ e.preventDefault(); save("sauvegardé"); }
+      if(mod && e.key.toLowerCase() === "k"){ e.preventDefault(); input.focus(); }
+    });
+
+    setInterval(tickClock, 15000);
+
+    // Apply saved filter UI
+    setFilter(state.filter || "all", true);
+  }
+
+  function setFilter(f, silent=false){
+    state.filter = f;
+    $("#fAll").setAttribute("aria-pressed", String(f==="all"));
+    $("#fTodo").setAttribute("aria-pressed", String(f==="todo"));
+    $("#fDone").setAttribute("aria-pressed", String(f==="done"));
+    if(!silent) scheduleSave();
+    renderTasks();
+  }
+
+  function addTaskFromInput(){
+    const text = input.value.trim();
+    if(!text) return;
+    addTask(text, guessMinutes(text));
+    input.value = "";
+    input.focus();
+  }
+
+  function addTask(text, minutes){
+    state.tasks.unshift({
+      id: Date.now() + Math.floor(Math.random()*1000),
+      text,
+      minutes: Number(minutes) || 10,
+      done: false,
+      createdAt: Date.now()
+    });
+    save("action ajoutée");
+  }
+
+  function toggleTask(id){
+    const t = state.tasks.find(x => x.id === id);
+    if(!t) return;
+    t.done = !t.done;
+    save("action mise à jour");
+  }
+
+  function deleteTask(id){
+    state.tasks = state.tasks.filter(x => x.id !== id);
+    save("action supprimée");
+  }
+
+  // “Je suis en galère” amélioré : 3 choix
+  function show2MinChoices(){
+    const choices = pickDistinct(micro2min, 3);
+    suggestBox.innerHTML = choices.map(c => `
+      <div class="suggestItem">
+        <div>
+          <div class="t">✅ ${escapeHtml(c)}</div>
+          <div class="m">2 minutes • juste démarrer</div>
+        </div>
+        <button class="iconBtn" data-add="${escapeAttr(c)}" title="Ajouter">＋</button>
+      </div>
+    `).join("") + `
+      <div class="suggestItem">
+        <div>
+          <div class="t">C’est ok d’y aller doucement.</div>
+          <div class="m">Choisis une seule chose. Une seule, c’est déjà bien.</div>
+        </div>
+        <button class="iconBtn" id="closeSug" title="Fermer">✕</button>
+      </div>
+    `;
+
+    suggestBox.querySelectorAll("button[data-add]").forEach(b => {
+      b.addEventListener("click", () => addTask(b.dataset.add, 2));
+    });
+    $("#closeSug").addEventListener("click", () => suggestBox.innerHTML = "");
+  }
+
+  function renderAll(){
+    renderTasks();
+    renderNotes();
+  }
+
+  function renderTasks(){
+    list.innerHTML = "";
+
+    const q = (state.search || "").trim().toLowerCase();
+
+    let tasks = state.tasks.slice();
+
+    // Search
+    if(q){
+      tasks = tasks.filter(t => (t.text || "").toLowerCase().includes(q));
+    }
+
+    // Filter
+    if(state.filter === "todo") tasks = tasks.filter(t => !t.done);
+    if(state.filter === "done") tasks = tasks.filter(t => t.done);
+
+    kpi.textContent = String(state.tasks.length);
+
+    if(tasks.length === 0){
+      list.innerHTML = `
+        <div class="suggestItem">
+          <div>
+            <div class="t">Rien à afficher.</div>
+            <div class="m">Tu peux changer le filtre, ou ajouter une action.</div>
+          </div>
+        </div>`;
+      return;
+    }
+
+    for(const t of tasks){
+      const row = document.createElement("div");
+      row.className = "item";
+
+      const left = document.createElement("div");
+
+      const title = document.createElement("p");
+      title.className = "title" + (t.done ? " done" : "");
+      title.textContent = (t.done ? "✅ " : "⬜ ") + t.text;
+      title.addEventListener("click", () => toggleTask(t.id));
+
+      const meta = document.createElement("div");
+      meta.className = "meta";
+
+      const m1 = document.createElement("span");
+      m1.className = "tag";
+      m1.textContent = "⏳ " + (t.minutes ?? 10) + " min";
+
+      const m2 = document.createElement("span");
+      m2.className = "tag";
+      m2.textContent = t.done ? "fait" : "à faire";
+
+      meta.appendChild(m1);
+      meta.appendChild(m2);
+
+      left.appendChild(title);
+      left.appendChild(meta);
+
+      const actions = document.createElement("div");
+      actions.style.display = "flex";
+      actions.style.gap = "6px";
+
+      const del = document.createElement("button");
+      del.className = "iconBtn";
+      del.textContent = "🗑";
+      del.title = "Supprimer";
+      del.addEventListener("click", () => deleteTask(t.id));
+
+      actions.appendChild(del);
+
+      row.appendChild(left);
+      row.appendChild(actions);
+      list.appendChild(row);
+    }
+  }
+
+  function saveNote(){
+    const ta = $("#note");
+    const text = ta.value.trim();
+    if(!text) return;
+    state.notes.unshift({ id: Date.now()+Math.floor(Math.random()*1000), text, createdAt: Date.now() });
+    ta.value = "";
+    save("note sauvegardée");
+  }
+
+  function deleteNote(id){
+    state.notes = state.notes.filter(n => n.id !== id);
+    save("note supprimée");
+  }
+
+  function renderNotes(){
+    const host = $("#notes");
+    host.innerHTML = "";
+
+    if(state.notes.length === 0){
+      host.innerHTML = `
+        <div class="suggestItem">
+          <div>
+            <div class="t">Aucune note.</div>
+            <div class="m">Tu peux écrire 2–3 lignes quand tu veux.</div>
+          </div>
+        </div>`;
+      return;
+    }
+
+    for(const n of state.notes.slice(0, 10)){
+      const box = document.createElement("div");
+      box.className = "suggestItem";
+      box.innerHTML = `
+        <div style="flex:1">
+          <div class="t">${escapeHtml(n.text).replace(/\n/g,"<br>")}</div>
+          <div class="m">${new Date(n.createdAt).toLocaleString("fr-FR")}</div>
+        </div>
+        <button class="iconBtn" title="Supprimer">🗑</button>
+      `;
+      box.querySelector("button").addEventListener("click", () => deleteNote(n.id));
+      host.appendChild(box);
+    }
+  }
+
+  function applyBigText(){
+    document.documentElement.classList.toggle("bigtext", !!state.bigText);
+  }
+
+  function save(msg){
+    localStorage.setItem(KEY, JSON.stringify(state));
+    if(msg){
+      status.textContent = msg + " • stockage local • hors-ligne";
+      setTimeout(() => status.textContent = "stockage local • hors-ligne", 900);
+    }
+    renderAll();
+  }
+
+  function load(){
+    try{
+      const raw = localStorage.getItem(KEY);
+      return raw ? JSON.parse(raw) : null;
+    }catch(e){
+      return null;
+    }
+  }
+
+  function exportData(){
+    const blob = new Blob([JSON.stringify(state, null, 2)], {type:"application/json"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "boussole-export.json";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function resetAll(){
+    if(!confirm("Tout effacer ? (actions + notes)")) return;
+    localStorage.removeItem(KEY);
+    location.reload();
+  }
+
+  function tickClock(){
+    const d = new Date();
+    const p = (n)=>String(n).padStart(2,"0");
+    $("#clock").textContent = `⏱ ${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`;
+  }
+
+  function guessMinutes(text){
+    const t = text.toLowerCase();
+    if(t.includes("2 min") || t.includes("2min")) return 2;
+    if(t.includes("5 min") || t.includes("5min")) return 5;
+    if(t.includes("10 min") || t.includes("10min")) return 10;
+    if(t.includes("15 min") || t.includes("15min")) return 15;
+    if(t.includes("30 min") || t.includes("30min")) return 30;
+    return 10;
+  }
+
+  function pickDistinct(arr, n){
+    const copy = arr.slice();
+    copy.sort(() => Math.random() - 0.5);
+    return copy.slice(0, n);
+  }
+
+  function escapeHtml(s){
+    return String(s ?? "")
+      .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;").replaceAll("'","&#039;");
+  }
+  function escapeAttr(s){ return escapeHtml(s).replaceAll("\n"," "); }
+})();
+</script>
+</body>
+</html>
+
